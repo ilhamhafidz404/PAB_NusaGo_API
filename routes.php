@@ -7,6 +7,9 @@ $routes = [
     'login' => ['AuthController', 'login'],
     'registration' => ['AuthController', 'registration'],
 
+    // Profile
+    'update-profile' => ['ProfileController', 'update'],
+
     'news' => ['NewsController', 'index'],
     'store-news' => ['NewsController', 'store'],
     'show-news' => ['NewsController', 'show'],

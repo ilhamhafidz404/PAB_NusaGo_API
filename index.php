@@ -7,6 +7,7 @@ require_once 'routes.php';
 // 
 require_once 'controllers/HomeController.php'; 
 require_once 'controllers/AuthController.php'; 
+require_once 'controllers/ProfileController.php'; 
 require_once 'controllers/NewsController.php'; 
 
 header("Access-Control-Allow-Origin: *");
