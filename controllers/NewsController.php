@@ -40,7 +40,8 @@ class NewsController
         $title       = $_POST['title']        ?? '';
         $description = $_POST['description']  ?? '';
         $body        = $_POST['body']         ?? '';
-        $user_id     = $_POST['user_id']      ?? null;       // ← ambil dari session / token jika perlu
+        $image       = $_POST['image']        ?? '';
+        $user_id     = $_POST['user_id']      ?? 1; 
 
         /* ── Validasi field dasar ── */
         if (!$title || !$description || !$body || !$user_id) {
@@ -52,26 +53,16 @@ class NewsController
             exit;
         }
 
-        /* ── Upload Gambar (optional) ── */
-        $imagePath = null;
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $imagePath = $this->handleImageUpload($_FILES['image']);
-            if ($imagePath === false) {
-                // handleImageUpload sudah mengirim response & exit
-                return;
-            }
-        }
-
         try {
             $stmt = $pdo->prepare(
-                "INSERT INTO news (title, description, body, image, user_id, created_at, updated_at)
-                 VALUES (:title, :description, :body, :image, :user_id, NOW(), NOW())"
+                "INSERT INTO news (title, description, body, image, user_id, created_at)
+                 VALUES (:title, :description, :body, :image, :user_id, NOW())"
             );
             $result = $stmt->execute([
                 'title'       => $title,
                 'description' => $description,
                 'body'        => $body,
-                'image'       => $imagePath,
+                'image'       => $image,
                 'user_id'     => $user_id
             ]);
 
