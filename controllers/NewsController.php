@@ -95,9 +95,12 @@ class NewsController
     }
 
     /* ───────────────────────── READ SINGLE ───────────────────────── */
-    public function show($id)
+    public function show()
     {
         global $pdo;
+
+        $id = $_GET["id"] ?? "1";
+
         header('Content-Type: application/json');
 
         try {
@@ -193,10 +196,12 @@ class NewsController
     }
 
     /* ───────────────────────── DELETE ───────────────────────── */
-    public function destroy($id)
+    public function destroy()
     {
         global $pdo;
         header('Content-Type: application/json');
+
+        $id = $_POST["id"] ?? "1";
 
         // cek record lama
         $stmtOld = $pdo->prepare("SELECT image FROM news WHERE id = :id");
@@ -208,10 +213,6 @@ class NewsController
             $result = $stmt->execute(['id' => $id]);
 
             if ($result) {
-                // hapus file image lama jika ada
-                if ($old && $old['image'] && file_exists($old['image'])) {
-                    @unlink($old['image']);
-                }
                 http_response_code(200);
                 echo json_encode(['status' => 'success', 'message' => 'Berita berhasil dihapus']);
             } else {
