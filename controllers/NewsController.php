@@ -120,15 +120,17 @@ class NewsController
     }
 
     /* ───────────────────────── UPDATE ───────────────────────── */
-    public function update($id)
+    public function update()
     {
         global $pdo;
         header('Content-Type: application/json');
 
         // ambil field yang di‐submit (boleh sebagian)
+        $id          = $_POST['id']       ?? null;
         $title       = $_POST['title']       ?? null;
         $description = $_POST['description'] ?? null;
         $body        = $_POST['body']        ?? null;
+        $image       = $_POST['image']        ?? null;
 
         // cek record lama (untuk mengambil path gambar lama jika akan diganti)
         $stmtOld = $pdo->prepare("SELECT * FROM news WHERE id = :id");
@@ -139,18 +141,6 @@ class NewsController
             http_response_code(404);
             echo json_encode(['status' => 'error', 'message' => 'Berita tidak ditemukan']);
             exit;
-        }
-
-        /* ── Upload gambar baru (optional) ── */
-        $imagePath = $oldData['image'];
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $imagePath = $this->handleImageUpload($_FILES['image']);
-            if ($imagePath === false) return;
-
-            // Hapus file lama jika ada
-            if ($oldData['image'] && file_exists($oldData['image'])) {
-                @unlink($oldData['image']);
-            }
         }
 
         // Bangun query dinamis
@@ -167,7 +157,7 @@ class NewsController
             exit;
         }
 
-        $sql = "UPDATE news SET " . implode(', ', $fields) . ", updated_at = NOW() WHERE id = :id";
+        $sql = "UPDATE news SET " . implode(', ', $fields) . " WHERE id = :id";
 
         try {
             $stmt = $pdo->prepare($sql);
