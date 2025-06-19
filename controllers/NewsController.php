@@ -2,19 +2,41 @@
 class NewsController
 {
     /* ───────────────────────── READ ALL ───────────────────────── */
-    public function index()
+   public function index()
     {
         global $pdo;
         header('Content-Type: application/json');
 
-        $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 3;  // pastikan integer & sanitasi
-        $limit = max(1, $limit); 
+        $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 3;
+        $limit = max(1, $limit); // Pastikan minimal 1
+
+        $query = isset($_GET['query']) ? trim($_GET['query']) : null;
 
         try {
-            $stmt = $pdo->prepare("SELECT * FROM news
-                       ORDER BY created_at DESC
-                       LIMIT :limit");
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT); 
+            // Base query
+            $sql = "SELECT * FROM news";
+            $params = [];
+
+            // Jika ada keyword pencarian
+            if (!empty($query)) {
+                $sql .= " WHERE title LIKE :q OR description LIKE :q OR body LIKE :q";
+                $params[':q'] = "%" . $query . "%";
+            }
+
+            // Tambahkan order dan limit
+            $sql .= " ORDER BY created_at DESC LIMIT :limit";
+
+            // Persiapkan dan binding parameter
+            $stmt = $pdo->prepare($sql);
+
+            // Binding parameter LIKE jika ada query
+            if (!empty($query)) {
+                $stmt->bindValue(':q', $params[':q'], PDO::PARAM_STR);
+            }
+
+            // Binding limit
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+
             $stmt->execute();
             $news = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -24,7 +46,6 @@ class NewsController
                 'message' => 'Get Data News Success',
                 'data'    => $news
             ]);
-
         } catch (PDOException $e) {
             resError('Terjadi kesalahan pada server.', $e->getMessage(), 500);
         }
