@@ -12,9 +12,15 @@ $routes = [
     'update-user' => ['UserController', 'update'],
     'delete-user' => ['UserController', 'delete'],
 
+    // News
     'news' => ['NewsController', 'index'],
     'store-news' => ['NewsController', 'store'],
     'show-news' => ['NewsController', 'show'],
     'update-news' => ['NewsController', 'update'],
     'destroy-news' => ['NewsController', 'destroy'],
+
+    // Transaction
+    'transactions' => ['TransactionController', 'index'],
+    'store-transaction' => ['TransactionController', 'store'],
+    'export-transaction' => ['TransactionController', 'export'],
 ];

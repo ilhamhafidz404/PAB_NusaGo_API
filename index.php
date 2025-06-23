@@ -9,6 +9,7 @@ require_once 'controllers/HomeController.php';
 require_once 'controllers/AuthController.php'; 
 require_once 'controllers/UserController.php'; 
 require_once 'controllers/NewsController.php'; 
+require_once 'controllers/TransactionController.php'; 
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
