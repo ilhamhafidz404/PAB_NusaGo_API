@@ -2,7 +2,7 @@
 class NewsController
 {
     /* ───────────────────────── READ ALL ───────────────────────── */
-   public function index()
+    public function index()
     {
         global $pdo;
         header('Content-Type: application/json');
@@ -62,7 +62,11 @@ class NewsController
         $description = $_POST['description']  ?? '';
         $body        = $_POST['body']         ?? '';
         $image       = $_POST['image']        ?? '';
-        $user_id     = $_POST['user_id']      ?? 1; 
+        $user_id     = $_POST['user_id']      ?? 1;
+        $with_event  = $_POST['with_event']   ?? 0;   // ← tambahan
+
+        /* Pastikan hanya 0 atau 1 */
+        $with_event = ($with_event == 1 || $with_event === '1') ? 1 : 0;
 
         /* ── Validasi field dasar ── */
         if (!$title || !$description || !$body || !$user_id) {
@@ -75,20 +79,22 @@ class NewsController
         }
 
         try {
+            /* ── Insert data ── */
             $stmt = $pdo->prepare(
-                "INSERT INTO news (title, description, body, image, user_id, created_at)
-                 VALUES (:title, :description, :body, :image, :user_id, NOW())"
+                "INSERT INTO news (title, description, body, image, user_id, with_event, created_at)
+                VALUES (:title, :description, :body, :image, :user_id, :with_event, NOW())"
             );
             $result = $stmt->execute([
                 'title'       => $title,
                 'description' => $description,
                 'body'        => $body,
                 'image'       => $image,
-                'user_id'     => $user_id
+                'user_id'     => $user_id,
+                'with_event'  => $with_event
             ]);
 
             if ($result) {
-                http_response_code(201);    // Created
+                http_response_code(201);
                 echo json_encode([
                     'status'  => 'success',
                     'message' => 'Berita berhasil ditambahkan'
@@ -100,11 +106,13 @@ class NewsController
                     'message' => 'Gagal menambah berita'
                 ]);
             }
+
         } catch (PDOException $e) {
             resError('Terjadi kesalahan pada server.', $e->getMessage(), 500);
         }
         exit;
     }
+
 
     /* ───────────────────────── READ SINGLE ───────────────────────── */
     public function show()
