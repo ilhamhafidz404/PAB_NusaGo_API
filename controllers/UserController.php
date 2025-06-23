@@ -1,6 +1,48 @@
 <?php
-class ProfileController
+class UserController
 {
+    public function index()
+    {
+        global $pdo;
+        header('Content-Type: application/json');
+
+        try {
+            /* ─────────────────────
+            Ambil data user
+            ───────────────────── */
+            $stmt = $pdo->prepare("
+                SELECT 
+                    *
+                FROM 
+                    accounts
+                WHERE
+                    role != 'admin'
+                ORDER BY 
+                    id 
+                DESC
+            ");
+            $stmt->execute();
+            $users = $stmt->fetchAll(PDO::FETCH_ASSOC); // gunakan fetchAll!
+
+            /* ─────────────────────
+            Response
+            ───────────────────── */
+            if (empty($users)) {
+                resError('Data user kosong', '', 404);
+                return;
+            }
+
+            sendSuccess([
+                'message' => 'Daftar user berhasil diambil',
+                'data'    => $users
+            ]);
+
+        } catch (PDOException $e) {
+            resError('Terjadi kesalahan pada server.', $e->getMessage(), 500);
+        }
+    }
+
+    
     public function update()
     {
         global $pdo;
