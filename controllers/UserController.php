@@ -114,4 +114,45 @@ class UserController
             resError('Terjadi kesalahan pada server.', $e->getMessage(), 500);
         }
     }
+
+    public function delete()
+    {
+        global $pdo;
+        header('Content-Type: application/json');
+
+        /* ─── Ambil id dari query string ─── */
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+        if ($id <= 0) {
+            resError('Parameter id tidak valid.', '', 400);
+        }
+
+        try {
+            /* ─── Cek akun ─── */
+            $stmt = $pdo->prepare("SELECT deleted_at FROM accounts WHERE id = :id");
+            $stmt->execute([':id' => $id]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$row) {
+                resError('User tidak ditemukan.', '', 404);
+            }
+
+            /* ─── Tentukan aksi: nonaktifkan / aktifkan ─── */
+            if ($row['deleted_at'] === null) {
+                // Akun aktif → lakukan soft-delete
+                $stmt = $pdo->prepare("UPDATE accounts SET deleted_at = NOW() WHERE id = :id");
+                $stmt->execute([':id' => $id]);
+
+                sendSuccess(['message' => 'User berhasil dinonaktifkan (soft delete)']);
+            } else {
+                // Akun sudah nonaktif → aktifkan kembali
+                $stmt = $pdo->prepare("UPDATE accounts SET deleted_at = NULL WHERE id = :id");
+                $stmt->execute([':id' => $id]);
+
+                sendSuccess(['message' => 'User berhasil diaktifkan kembali']);
+            }
+
+        } catch (PDOException $e) {
+            resError('Terjadi kesalahan saat memproses permintaan.', $e->getMessage(), 500);
+        }
+    }
 }
